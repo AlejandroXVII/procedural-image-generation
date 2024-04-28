@@ -1,15 +1,14 @@
 import "./style.css";
-import typescriptLogo from "./typescript.svg";
-import viteLogo from "/vite.svg";
+import typescriptLogo from "/src/textures/water.jpg";
+import viteLogo from "/src/textures/grass.jpg";
 import { setupCounter } from "./counter.ts";
 
-// Function that choose a value of the entropy values of a Cell
 /**
- * @param {string[]} entropyValues - A string of values
- * @returns {string} The value that has been chosen
+ * @param {number} max - Any Int number
+ * @returns {number} An Int number between 0 and max param
  */
-function collapse(entropyValues: string[]): string {
-	return entropyValues[Math.floor(Math.random() * entropyValues.length)];
+function getRandom(max: number): number {
+	return Math.floor(Math.random() * max);
 }
 
 //Element that can be next to another element
@@ -27,24 +26,75 @@ interface CellType {
 }
 
 //The initial state of a cell with all the possible entropyValues, so this state has the entropy lv higher
-const cell: CellType = {
-	entropyValues: ["water", "grass", "sand"],
-	value: "",
-	isCollapsed: false,
+class Cell {
+	entropyValues = ["water", "grass", "sand"];
+	value = "";
+	isCollapsed = false;
+}
+
+type UnclearCell = CellType | undefined;
+const isCellType = (cell: UnclearCell): cell is CellType => {
+	return cell instanceof Cell;
 };
 
 //Declare the high and wight of the Matrix as well as the matrix itself
-let columns: number = 3;
-let rows: number = 3;
+let columns = 3;
+let rows = 3;
 let matrix = new Map<string, CellType>();
+
+// Function that choose a value of the entropy values of a Cell
+//An then propagate to the next to cell
+/** @param {number[]} coordinate - The coordinate of the obj in the matrix that its going to collapse*/
+function collapse(coordinate: number[]): void {
+	function propagate(
+		currentCoordinate: string,
+		propagateCoordinate: string
+	): void {
+		const currentCell = matrix.get(currentCoordinate);
+		const propagateCell = matrix.get(propagateCoordinate);
+		if (!isCellType(currentCell)) return;
+		if (!isCellType(propagateCell)) return;
+
+		const ruleArray = rules.get(currentCell.value);
+		if (ruleArray === undefined) return;
+		propagateCell.entropyValues = propagateCell.entropyValues
+			.map((item) => item)
+			.filter((element) => ruleArray.includes(element));
+	}
+	let cell = matrix.get(coordinate.toString());
+
+	if (!isCellType(cell)) return;
+
+	let entropyIndex = getRandom(cell.entropyValues.length);
+	cell.entropyValues = [cell.entropyValues[entropyIndex]];
+	cell.isCollapsed = true;
+	cell.value = cell.entropyValues[0];
+
+	//Get the up, down, left and right keys to the cells value object
+	let upKey = [coordinate[0] - 1, coordinate[1]].toString();
+	let DownKey = [coordinate[0] + 1, coordinate[1]].toString();
+	let LeftKey = [coordinate[0], coordinate[1] - 1].toString();
+	let RightKey = [coordinate[0], coordinate[1] + 1].toString();
+
+	console.log(coordinate);
+	propagate(coordinate.toString(), upKey);
+	propagate(coordinate.toString(), DownKey);
+	propagate(coordinate.toString(), LeftKey);
+	propagate(coordinate.toString(), RightKey);
+	console.log(matrix);
+}
 
 //Initialized the matrix with all its values as CellType
 for (let indexColumn = 0; indexColumn < columns; indexColumn++) {
 	for (let indexRow = 0; indexRow < rows; indexRow++) {
+		const cell = new Cell();
 		matrix.set([indexColumn, indexRow].toString(), cell);
 	}
 }
-console.log(matrix);
+
+let cellToCollapseCoordinate = [getRandom(columns), getRandom(rows)];
+
+collapse(cellToCollapseCoordinate);
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div>
