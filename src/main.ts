@@ -23,13 +23,22 @@ interface CellType {
 	entropyValues: string[];
 	value: string;
 	isCollapsed: boolean;
+	coordinate: Coordinate;
 }
 
+type Coordinate = [number, number];
 //The initial state of a cell with all the possible entropyValues, so this state has the entropy lv higher
 class Cell {
-	entropyValues = ["water", "grass", "sand"];
-	value = "";
-	isCollapsed = false;
+	entropyValues: string[];
+	value: string;
+	isCollapsed: boolean;
+	coordinate: Coordinate;
+	constructor(coordinate: Coordinate) {
+		this.entropyValues = ["water", "grass", "sand"];
+		this.value = "";
+		this.isCollapsed = false;
+		this.coordinate = coordinate;
+	}
 }
 
 type UnclearCell = CellType | undefined;
@@ -41,7 +50,8 @@ const isCellType = (cell: UnclearCell): cell is CellType => {
 let columns = 3;
 let rows = 3;
 let matrix = new Map<string, CellType>();
-
+let entropyCellList: CellType[] = [];
+let counter = 0;
 // Function that choose a value of the entropy values of a Cell
 //An then propagate to the next to cell
 /** @param {number[]} coordinate - The coordinate of the obj in the matrix that its going to collapse*/
@@ -60,6 +70,7 @@ function collapse(coordinate: number[]): void {
 		propagateCell.entropyValues = propagateCell.entropyValues
 			.map((item) => item)
 			.filter((element) => ruleArray.includes(element));
+		entropyCellList.push(propagateCell);
 	}
 	let cell = matrix.get(coordinate.toString());
 
@@ -76,18 +87,33 @@ function collapse(coordinate: number[]): void {
 	let LeftKey = [coordinate[0], coordinate[1] - 1].toString();
 	let RightKey = [coordinate[0], coordinate[1] + 1].toString();
 
-	console.log(coordinate);
 	propagate(coordinate.toString(), upKey);
 	propagate(coordinate.toString(), DownKey);
 	propagate(coordinate.toString(), LeftKey);
 	propagate(coordinate.toString(), RightKey);
-	console.log(matrix);
+
+	entropyCellList.sort((a, b) => {
+		if (a.entropyValues.length < b.entropyValues.length) {
+			return 1;
+		} else {
+			return -1;
+		}
+	});
+	if (entropyCellList.length > 0 && counter < columns * rows) {
+		let newCurrentCell = entropyCellList.shift();
+		if (isCellType(newCurrentCell)) {
+			counter += 1;
+			collapse(newCurrentCell.coordinate);
+		}
+	} else {
+		console.log(matrix);
+	}
 }
 
 //Initialized the matrix with all its values as CellType
 for (let indexColumn = 0; indexColumn < columns; indexColumn++) {
 	for (let indexRow = 0; indexRow < rows; indexRow++) {
-		const cell = new Cell();
+		const cell = new Cell([indexColumn, indexRow]);
 		matrix.set([indexColumn, indexRow].toString(), cell);
 	}
 }
