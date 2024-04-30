@@ -1,7 +1,8 @@
 import "./style.css";
-import typescriptLogo from "/src/textures/water.jpg";
-import viteLogo from "/src/textures/grass.jpg";
 import { setupCounter } from "./counter.ts";
+import grassSRC from "./textures/grass.jpg";
+import sandSRC from "./textures/sand.jpg";
+import waterSRC from "./textures/water.jpg";
 
 /**
  * @param {number} max - Any Int number
@@ -47,8 +48,8 @@ const isCellType = (cell: UnclearCell): cell is CellType => {
 };
 
 //Declare the high and wight of the Matrix as well as the matrix itself
-let columns = 3;
-let rows = 3;
+let columns = 10;
+let rows = 10;
 let matrix = new Map<string, CellType>();
 let entropyCellList: CellType[] = [];
 let counter = 0;
@@ -107,7 +108,42 @@ function collapse(coordinate: number[]): void {
 		}
 	} else {
 		console.log(matrix);
+		renderTerrane();
 	}
+}
+
+function renderTerrane() {
+	window.onload = () => {
+		const container = document.getElementById("terrane-container");
+		console.log(container);
+		for (let x = 0; x < columns; x++) {
+			for (let y = 0; y < rows; y++) {
+				const textureIMG = document.createElement("img");
+				const currentCell = matrix.get([x, y].toString());
+				if (isCellType(currentCell))
+					switch (currentCell.entropyValues[0]) {
+						case "water":
+							textureIMG.src = waterSRC;
+							break;
+						case "grass":
+							textureIMG.src = grassSRC;
+							break;
+						case "sand":
+							textureIMG.src = sandSRC;
+							break;
+						default:
+							break;
+					}
+				container?.appendChild(textureIMG);
+				container?.setAttribute(
+					"style",
+					"display: grid;grid-template-columns: repeat(" +
+						columns +
+						", auto);justify-content: center;"
+				);
+			}
+		}
+	};
 }
 
 //Initialized the matrix with all its values as CellType
@@ -124,12 +160,7 @@ collapse(cellToCollapseCoordinate);
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div>
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="${viteLogo}" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://www.typescriptlang.org/" target="_blank">
-      <img src="${typescriptLogo}" class="logo vanilla" alt="TypeScript logo" />
-    </a>
+    <div id="terrane-container"></div>
     <h1>Vite + TypeScript</h1>
     <div class="card">
       <button id="counter" type="button"></button>
