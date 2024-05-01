@@ -1,8 +1,8 @@
 import "./style.css";
 import { setupCounter } from "./counter.ts";
-import grassSRC from "./textures/grass.jpg";
-import sandSRC from "./textures/sand.jpg";
-import waterSRC from "./textures/water.jpg";
+import grassSRC from "./textures/grass.png";
+import sandSRC from "./textures/sand.png";
+import waterSRC from "./textures/water.png";
 
 /**
  * @param {number} max - Any Int number
@@ -15,10 +15,97 @@ function getRandom(max: number): number {
 //Element that can be next to another element
 //Element that repeat its name inside the array is to allow to be close to itself
 //At the moment are element that can be next to because it could be more scalable
-let rules = new Map<string, string[]>();
-rules.set("water", ["water", "sand"]);
-rules.set("sand", ["sand", "grass", "water"]);
-rules.set("grass", ["grass", "sand"]);
+let rules = new Map<string, string[][]>();
+rules.set("water", [
+	["water", "st-wb", "c-wtl-s", "c-wtr-s"],
+	["water", "sr-wl", "c-wrb-s", "c-wtr-s"],
+	["water", "wt-sb-", "c-wbl-s", "c-wrb-s"],
+	["water", "wr-sl", "c-wbl-s", "c-wtl-s"],
+]);
+rules.set("grass", [
+	["grass", "sand"],
+	["grass", "sand"],
+	["grass", "sand"],
+	["grass", "sand"],
+]);
+rules.set("sand", [
+	["sand", "wt-sb", "c-stl-w", "c-str-w"],
+	["sand", "wr-sl", "c-slb-w", "c-str-w"],
+	["sand", "st-wb", "c-sbl-w", "c-slb-w"],
+	["sand", "wr-sl", "c-sbl-w", "c-stl-w"],
+]);
+rules.set("st-wb", [
+	["sand"],
+	["st-wb", "c-wtl-s", "c-sbl-w"],
+	["water", "wt-sb"],
+	["st-wb", "c-wtr-s", "c-slb-w"],
+]);
+rules.set("wt-sb", [
+	["water", "st-wb"],
+	["wt-sb", "c-stl-w", "c-wbl-s"],
+	["sand"],
+	["wt-sb", "c-str-w", "c-wrb-s"],
+]);
+rules.set("sr-wl", [
+	["sr-wl", "c-sbl-w", "c-wrb-s"],
+	["sand"],
+	["sr-wl", "c-stl-w", "c-wtr-s"],
+	["water", "wr-sl"],
+]);
+rules.set("wr-sl", [
+	["wr-sl", "c-slb-w", "c-wbl-s"],
+	["water", "sr-wl"],
+	["wr-sl", "c-str-w", "c-wtl-s"],
+	["sand"],
+]);
+rules.set("c-sbl-w", [
+	["sand"],
+	["sand"],
+	["c-stl-w", "c-wtr-s", "sr-wl"],
+	["c-slb-w", "c-wtr-s", "st-wb"],
+]);
+rules.set("c-slb-w", [
+	["sand"],
+	["c-sbl-w", "c-wtl-s", "st-wb"],
+	["c-str-w", "c-wtl-s", "wr-sl"],
+	["sand"],
+]);
+rules.set("c-stl-w", [
+	["sr-wl", "c-sbl-w", "c-wrb-s"],
+	["sand"],
+	["sand"],
+	["wt-sb", "c-str-w", "c-wrb-s"],
+]);
+rules.set("c-str-w", [
+	["wr-sl", "c-slb-w", "c-wbl-s"],
+	["wt-sb", "c-stl-w", "c-wbl-s"],
+	["sand"],
+	["sand"],
+]);
+rules.set("c-wbl-s", [
+	["water", "st-wb", "c-wtl-s", "c-wtr-s"],
+	["water", "sr-wl", "c-wrb-s", "c-wtr-s"],
+	["wr-sl", "c-str-w", "c-wtl-s"],
+	["wt-sb", "c-str-w", "c-wrb-s"],
+]);
+rules.set("c-wrb-s", [
+	["water", "st-wb", "c-wtl-s", "c-wtr-s"],
+	["wt-sb", "c-stl-w", "c-wbl-s"],
+	["sr-wl", "c-stl-w", "c-wtr-s"],
+	["water", "wr-sl", "c-wbl-s", "c-wtl-s"],
+]);
+rules.set("c-wtl-s", [
+	["wr-sl", "c-slb-w", "c-wbl-s"],
+	["water", "sr-wl", "c-wrb-s", "c-wtr-s"],
+	["water", "wt-sb-", "c-wbl-s", "c-wrb-s"],
+	["st-wb", "c-wtr-s", "c-slb-w"],
+]);
+rules.set("c-wtr-s", [
+	["sr-wl", "c-sbl-w", "c-wrb-s"],
+	["st-wb", "c-wtl-s", "c-sbl-w"],
+	["water", "wt-sb-", "c-wbl-s", "c-wrb-s"],
+	["water", "wr-sl", "c-wbl-s", "c-wtl-s"],
+]);
 
 interface CellType {
 	entropyValues: string[];
@@ -48,8 +135,8 @@ const isCellType = (cell: UnclearCell): cell is CellType => {
 };
 
 //Declare the high and wight of the Matrix as well as the matrix itself
-let columns = 10;
-let rows = 10;
+let columns = 20;
+let rows = 20;
 let matrix = new Map<string, CellType>();
 let entropyCellList: CellType[] = [];
 let counter = 0;
