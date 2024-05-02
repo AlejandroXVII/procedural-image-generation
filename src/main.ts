@@ -163,8 +163,8 @@ const isCellType = (cell: UnclearCell): cell is CellType => {
 };
 
 //Declare the high and wight of the Matrix as well as the matrix itself
-let columns = 51;
-let rows = 51;
+let columns = 30;
+let rows = 30;
 let matrix = new Map<string, CellType>();
 let entropyCellList: CellType[] = [];
 let counter = 0;
@@ -199,10 +199,12 @@ function collapse(coordinate: number[]): void {
 	let cell = matrix.get(coordinate.toString());
 
 	if (!isCellType(cell)) return;
-	console.log("*");
-	let entropyIndex = getRandom(cell.entropyValues.length - 1);
+	let entropyIndex: number;
+	entropyIndex = getRandom(cell.entropyValues.length);
+
 	cell.isCollapsed = true;
 	cell.value = cell.entropyValues[entropyIndex];
+	if (cell.value === "c-wbl-s") console.log(cell.entropyValues);
 	cell.entropyValues = [cell.value];
 
 	//Get the up, down, left and right keys to the cells value object
@@ -328,13 +330,6 @@ collapse(cellToCollapseCoordinate);
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div>
     <div id="terrane-container"></div>
-    <h1>Vite + TypeScript</h1>
-    <div class="card">
-      <button id="counter" type="button"></button>
-    </div>
-    <p class="read-the-docs">
-      Click on the Vite and TypeScript logos to learn more
-    </p>
   </div>
 `;
 
