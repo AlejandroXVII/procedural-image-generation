@@ -1,5 +1,4 @@
 import "./style.css";
-import { setupCounter } from "./counter.ts";
 import grass_SRC from "./textures/grass.png";
 import sand_SRC from "./textures/sand.png";
 import water_SRC from "./textures/water.png";
@@ -24,6 +23,15 @@ function getRandom(max: number): number {
 	return Math.floor(Math.random() * max);
 }
 
+function getRandomByWeight(entropyValues: string[]): string {
+	let weightList: string[] = [];
+	entropyValues.forEach((value) => {
+		for (let index = 0; index < weight[value]; index++) {
+			weightList.push(value);
+		}
+	});
+	return weightList[getRandom(weightList.length)];
+}
 //Element that can be next to another element
 //Element that repeat its name inside the array is to allow to be close to itself
 //At the moment are element that can be next to because it could be more scalable
@@ -125,6 +133,26 @@ interface CellType {
 	isCollapsed: boolean;
 	coordinate: Coordinate;
 }
+type weightType = {
+	[key: string]: number;
+};
+const weight: weightType = {
+	water: 5,
+	grass: 30,
+	sand: 5,
+	"c-sbl-w": 1,
+	"c-slb-w": 1,
+	"c-stl-w": 1,
+	"c-str-w": 1,
+	"c-wbl-s": 1,
+	"c-wrb-s": 1,
+	"c-wtl-s": 1,
+	"c-wtr-s": 1,
+	"sr-wl": 1,
+	"st-wb": 1,
+	"wr-sl": 1,
+	"wt-sb": 1,
+};
 
 type Coordinate = [number, number];
 //The initial state of a cell with all the possible entropyValues, so this state has the entropy lv higher
@@ -199,11 +227,12 @@ function collapse(coordinate: number[]): void {
 	let cell = matrix.get(coordinate.toString());
 
 	if (!isCellType(cell)) return;
-	let entropyIndex: number;
-	entropyIndex = getRandom(cell.entropyValues.length);
+
+	//let entropyIndex: number;
+	//entropyIndex = getRandom(cell.entropyValues.length);
 
 	cell.isCollapsed = true;
-	cell.value = cell.entropyValues[entropyIndex];
+	cell.value = getRandomByWeight(cell.entropyValues);
 	if (cell.value === "c-wbl-s") console.log(cell.entropyValues);
 	cell.entropyValues = [cell.value];
 
@@ -332,5 +361,3 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
     <div id="terrane-container"></div>
   </div>
 `;
-
-setupCounter(document.querySelector<HTMLButtonElement>("#counter")!);
