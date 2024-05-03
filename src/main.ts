@@ -365,11 +365,7 @@ function initialized() {
 		}
 	}
 }
-initialized();
-let cellToCollapseCoordinate = [getRandom(columns), getRandom(rows)];
-collapse(cellToCollapseCoordinate);
 
-let possibilites = 3;
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div>
 	<div>
@@ -378,10 +374,11 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 	<div>
 	<input id="columns" type="number" placeholder="Columns" />
 	<input  id="rows" type="number" placeholder="Rows" />
-	<button id="generator">Generate other</button>
+	<button id="generator">GENERATE</button>
 	</div>
-    <div id="terrane-container"></div>
 	<p id="error"></p>
+    <div id="terrane-container"></div>
+	
   </div>
 `;
 let $terrainContainer = document.getElementById("terrane-container");
@@ -393,7 +390,7 @@ if ($buttonGenerator !== null) {
 	$buttonGenerator.onclick = function () {
 		columns = Number($columnsInput?.value);
 		rows = Number($rowsInput?.value);
-		if (columns > 1 && rows > 1) {
+		if (columns > 1 && rows > 1 && columns < 60 && rows < 60) {
 			if ($terrainContainer !== null) {
 				$errorMessage!.innerHTML = "";
 				$terrainContainer.innerHTML = "";
@@ -403,7 +400,7 @@ if ($buttonGenerator !== null) {
 			}
 		} else if ($errorMessage !== null) {
 			$errorMessage!.innerHTML =
-				"Columns and Rows shall be bigger than 1";
+				"Error: columns and Rows shall be bigger than 1 and smaller than 60";
 		}
 	};
 }
