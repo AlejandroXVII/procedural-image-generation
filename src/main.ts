@@ -194,8 +194,8 @@ const isCellType = (cell: UnclearCell): cell is CellType => {
 };
 
 //Declare the high and wight of the Matrix as well as the matrix itself
-let columns = 30;
-let rows = 30;
+let columns: number;
+let rows: number;
 let matrix = new Map<string, CellType>();
 let entropyCellList: CellType[] = [];
 let counter: number;
@@ -369,11 +369,11 @@ initialized();
 let cellToCollapseCoordinate = [getRandom(columns), getRandom(rows)];
 collapse(cellToCollapseCoordinate);
 
+let possibilites = 3;
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div>
 	<div>
 		<h1>Generate procedural terrains!</h1>
-		<h2>There are <span>${columns * rows * 18}</span> diferent posibilities</h2>
 	</div>
 	<div>
 	<input id="columns" type="number" placeholder="Columns" />
@@ -381,22 +381,29 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 	<button id="generator">Generate other</button>
 	</div>
     <div id="terrane-container"></div>
-	
+	<p id="error"></p>
   </div>
 `;
 let $terrainContainer = document.getElementById("terrane-container");
 let $buttonGenerator = document.getElementById("generator");
+let $errorMessage = <HTMLElement>document.getElementById("error");
 let $columnsInput = <HTMLInputElement>document.getElementById("columns");
 let $rowsInput = <HTMLInputElement>document.getElementById("rows");
 if ($buttonGenerator !== null) {
 	$buttonGenerator.onclick = function () {
 		columns = Number($columnsInput?.value);
 		rows = Number($rowsInput?.value);
-		if ($terrainContainer !== null) {
-			$terrainContainer.innerHTML = "";
-			matrix.clear();
-			initialized();
-			collapse([1, 1]);
+		if (columns > 1 && rows > 1) {
+			if ($terrainContainer !== null) {
+				$errorMessage!.innerHTML = "";
+				$terrainContainer.innerHTML = "";
+				matrix.clear();
+				initialized();
+				collapse([1, 1]);
+			}
+		} else if ($errorMessage !== null) {
+			$errorMessage!.innerHTML =
+				"Columns and Rows shall be bigger than 1";
 		}
 	};
 }
