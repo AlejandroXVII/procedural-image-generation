@@ -30,4 +30,4 @@ This project is my own TypeScript implementation of the wave function collapse a
 
 ## 📷 Screenshot
 
-![Islands in pixel art](http://public/screenshot.png)
+![Islands in pixel art](./public/screenshot.png)
