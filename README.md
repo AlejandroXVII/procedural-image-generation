@@ -2,7 +2,7 @@
 
 ## 🔗 Links
 
--   [Live Link](https://alejandroxvii.github.io/)
+-   [Live Link](https://procedural-image-generation.pages.dev/)
 -   [Textures](https://opengameart.org/content/outdoors-tileset-16x16)
 
 ## 📝 About
@@ -27,3 +27,7 @@ This project is my own TypeScript implementation of the wave function collapse a
 -   ESLint
 -   Prettier
 -   Vite
+
+## 📷 Screenshot
+
+![Islands in pixel art](http://public/screenshot.png)
