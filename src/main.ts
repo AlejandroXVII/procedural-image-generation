@@ -26,6 +26,12 @@ function getRandom(max: number): number {
 	return Math.floor(Math.random() * max);
 }
 
+//Get a random number of .entropyValue calculate by weight
+//Using the weightList
+/**
+ * @param {string[]} entropyValues - the .entropyValue of the class Cell
+ * @returns {string} A random string calculated by weight texture
+ */
 function getRandomByWeight(entropyValues: string[]): string {
 	let weightList: string[] = [];
 	entropyValues.forEach((value) => {
@@ -35,9 +41,11 @@ function getRandomByWeight(entropyValues: string[]): string {
 	});
 	return weightList[getRandom(weightList.length)];
 }
-//Element that can be next to another element
+
+//Rules that determinate what element can be next to other element
 //Element that repeat its name inside the array is to allow to be close to itself
 //At the moment are element that can be next to because it could be more scalable
+//The order of direction in the rules are Top, Right, Bottom, Left
 let rules = new Map<string, string[][]>();
 rules.set("water", [
 	["water", "st-wb", "c-wtl-s", "c-wtr-s"],
@@ -139,6 +147,8 @@ interface CellType {
 type weightType = {
 	[key: string]: number;
 };
+
+//Weight determine what texture is most probable to appear when the number is higher
 const weight: weightType = {
 	water: 10,
 	grass: 30,
@@ -188,6 +198,7 @@ class Cell {
 	}
 }
 
+//To could determinate when a element is a CellType
 type UnclearCell = CellType | undefined;
 const isCellType = (cell: UnclearCell): cell is CellType => {
 	return cell instanceof Cell;
@@ -199,10 +210,19 @@ let rows: number;
 let matrix = new Map<string, CellType>();
 let entropyCellList: CellType[] = [];
 let counter: number;
-// Function that choose a value of the entropy values of a Cell
+
+//Principal function, a recursive function that travel through all the matrix
+//Collapsing the current element and adding the top, right, bottom and left element
+//To the entropyCellList, with this list calculate what element have the less entropy and collapse it
+//in a recursive way until the matrix is completely collapse
 //An then propagate to the next to cell
 /** @param {number[]} coordinate - The coordinate of the obj in the matrix that its going to collapse*/
 function collapse(coordinate: number[]): void {
+	/**
+	 * @param {string} currentCoordinate - the coordinate that has been collapse in this iteration
+	 * @param {string} propagateCoordinate - the coordinate that the coordinate to where it will propagate
+	 * @param {string} ruleArray - the textures that are allow to this element, all other texture that it is not in this array will be eliminate
+	 */
 	function propagate(
 		currentCoordinate: string,
 		propagateCoordinate: string,
@@ -213,7 +233,7 @@ function collapse(coordinate: number[]): void {
 		if (!isCellType(currentCell)) return;
 		if (!isCellType(propagateCell)) return;
 
-		//const ruleArray = rules.get(currentCell.value);
+		//Eliminate element that are no in ruleArray
 		if (ruleArray === undefined) return;
 		propagateCell.entropyValues = propagateCell.entropyValues
 			.map((item) => item)
@@ -231,11 +251,12 @@ function collapse(coordinate: number[]): void {
 
 	if (!isCellType(cell)) return;
 
+	//This is where the cell actually collapse
 	cell.isCollapsed = true;
 	cell.value = getRandomByWeight(cell.entropyValues);
 	cell.entropyValues = [cell.value];
 
-	//Get the up, down, left and right keys to the cells value object
+	//Get the up, right, down and left keys to the cells value object
 	let upKey = [coordinate[0] - 1, coordinate[1]].toString();
 	let RightKey = [coordinate[0], coordinate[1] + 1].toString();
 	let DownKey = [coordinate[0] + 1, coordinate[1]].toString();
@@ -243,12 +264,14 @@ function collapse(coordinate: number[]): void {
 
 	let currentRules = rules.get(cell.value);
 
+	//Propagate the corresponding rule to the up, right, down and left cells
 	if (currentRules === undefined) return;
 	propagate(coordinate.toString(), upKey, currentRules[0]);
 	propagate(coordinate.toString(), RightKey, currentRules[1]);
 	propagate(coordinate.toString(), DownKey, currentRules[2]);
 	propagate(coordinate.toString(), LeftKey, currentRules[3]);
 
+	//Sort entropyCellList to put the cell with less entropy in the first position
 	entropyCellList.sort((a, b) => {
 		if (a.entropyValues.length > b.entropyValues.length) {
 			return 1;
@@ -256,6 +279,9 @@ function collapse(coordinate: number[]): void {
 			return -1;
 		}
 	});
+
+	//Eliminate the first Cell of entropyCellList the then collapse it
+	//In the case that there is no elements in entropyCellList so it render on screen
 	let newCurrentCell = entropyCellList.shift();
 	if (entropyCellList.length > 0 && counter < columns * rows + 10) {
 		if (isCellType(newCurrentCell)) {
@@ -267,6 +293,7 @@ function collapse(coordinate: number[]): void {
 	}
 }
 
+//Display the matrix on screen
 function renderTerrane() {
 	const container = document.getElementById("terrane-container");
 	for (let x = 0; x < columns; x++) {
@@ -381,6 +408,7 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 	
   </div>
 `;
+
 let $terrainContainer = document.getElementById("terrane-container");
 let $buttonGenerator = document.getElementById("generator");
 let $errorMessage = <HTMLElement>document.getElementById("error");
